@@ -11,8 +11,8 @@ public class DesktopLauncher {
 		config.title = "Undefined Game";
 		config.resizable = false;
 		config.foregroundFPS = cfg.fps;
-		config.width = cfg.width;
-		config.height = cfg.height;
+		config.width = cfg.VIRTUAL_WIDTH;
+		config.height = cfg.VIRTUAL_HEIGTH;
 		new LwjglApplication(new UndefinedCore(), config);
 	}
 }
