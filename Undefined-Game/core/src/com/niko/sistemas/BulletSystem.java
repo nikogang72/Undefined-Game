@@ -33,6 +33,8 @@ public class BulletSystem extends EntitySystem implements EntityListener
 	
 	public BulletSystem()
 	{
+		MyContactListener myContactListener = new MyContactListener();
+		myContactListener.enable();
 		collisionConfiguration = new btDefaultCollisionConfiguration();
 		dispatcher = new btCollisionDispatcher(collisionConfiguration);
 		broadphase = new btAxisSweep3(new Vector3(-1000, -1000, -1000), new Vector3(1000, 1000, 1000));
@@ -41,6 +43,7 @@ public class BulletSystem extends EntitySystem implements EntityListener
 		ghostPairCallback = new btGhostPairCallback();
 		broadphase.getOverlappingPairCache().setInternalGhostPairCallback(ghostPairCallback);
 		this.collisionWorld.setGravity(new Vector3(0, -0.5f, 0));
+		
 	}
 	
 	@Override

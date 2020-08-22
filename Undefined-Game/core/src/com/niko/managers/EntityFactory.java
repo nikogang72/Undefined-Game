@@ -2,7 +2,6 @@ package com.niko.managers;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -23,8 +22,10 @@ import com.badlogic.gdx.physics.bullet.dynamics.btKinematicCharacterController;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.niko.components.BulletComponent;
 import com.niko.components.CharacterComponent;
+import com.niko.components.EnemyComponent;
 import com.niko.components.ModelComponent;
 import com.niko.components.PlayerComponent;
+import com.niko.components.StatusComponent;
 import com.niko.sistemas.BulletSystem;
 import com.niko.sistemas.MotionState;
 
@@ -92,6 +93,14 @@ public class EntityFactory {
 	{
 		Entity entity = createCharacter(bulletSystem, x, y, z);
 		entity.add(new PlayerComponent());
+		return entity;
+	}
+	
+	public static Entity createEnemy(BulletSystem bulletSystem, float x, float y, float z)
+	{
+		Entity entity = createCharacter(bulletSystem, x, y, z);
+		entity.add(new EnemyComponent(EnemyComponent.STATE.HUNTING));
+		entity.add(new StatusComponent());
 		return entity;
 	}
 }

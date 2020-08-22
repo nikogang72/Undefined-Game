@@ -17,8 +17,10 @@ import com.niko.cfg.cfg;
 import com.niko.components.CharacterComponent;
 import com.niko.managers.EntityFactory;
 import com.niko.sistemas.BulletSystem;
+import com.niko.sistemas.EnemySystem;
 import com.niko.sistemas.PlayerSystem;
 import com.niko.sistemas.RenderSystem;
+import com.niko.sistemas.StatusSystem;
 
 public class GameWorld {
 	
@@ -80,6 +82,10 @@ public class GameWorld {
 		System.out.println("Log: Physics System added");
 		engine.addSystem(new PlayerSystem(this, cam));
 		System.out.println("Log: Player System added");
+		engine.addSystem(new EnemySystem(this));
+		System.out.println("Log: Enemy System added");
+		engine.addSystem(new StatusSystem(this));
+		System.out.println("Log: Status System added");
 	}
 	
 	private void addEntities()
@@ -117,6 +123,11 @@ public class GameWorld {
 		batch.end();
 	}
 	
+	public void remove(Entity entity)
+	{
+		engine.removeEntity(entity);
+		bulletSystem.removeBody(entity);
+	}
 	
 	/**The ModelBatch is one of the object, which require disposing, 
 	 * hence we add it to the dispose function **/
