@@ -11,4 +11,10 @@ public class cfg {
 	public static final int VIRTUAL_WIDTH = 1280;
 	/** Alto de la pantalla **/
 	public static final int VIRTUAL_HEIGTH = 720;
+	
+	/** Vida Maxima del Jugador **/
+	public static int plyHealth = 100;
+	
+	/**Energia Maxima del Jugador**/
+	public static int plyEnergy = 100;
 }

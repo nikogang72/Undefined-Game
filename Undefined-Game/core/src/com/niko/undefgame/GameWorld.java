@@ -14,9 +14,10 @@ import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.physics.bullet.Bullet;
 import com.niko.cfg.cfg;
-import com.niko.components.ModelComponent;
+import com.niko.components.CharacterComponent;
 import com.niko.managers.EntityFactory;
 import com.niko.sistemas.BulletSystem;
+import com.niko.sistemas.PlayerSystem;
 import com.niko.sistemas.RenderSystem;
 
 public class GameWorld {
@@ -25,16 +26,17 @@ public class GameWorld {
 	private Environment environment;
 	private PerspectiveCamera cam;
 	private Engine engine;
+	private Entity character;
 	public BulletSystem bulletSystem;
 	public ModelBuilder modelBuilder = new ModelBuilder();
 	
-	Model wallHorizontal = modelBuilder.createBox(40, 20, 1, 
+	public Model wallHorizontal = modelBuilder.createBox(40, 20, 1, 
 			new Material(ColorAttribute.createDiffuse(Color.WHITE), ColorAttribute.createSpecular(Color.RED), 
 					FloatAttribute.createShininess(16f)), VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
-    Model wallVertical = modelBuilder.createBox(1, 20, 40,
+    public Model wallVertical = modelBuilder.createBox(1, 20, 40,
             new Material(ColorAttribute.createDiffuse(Color.GREEN), ColorAttribute.createSpecular(Color.WHITE), FloatAttribute
                     .createShininess(16f)), VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
-    Model groundModel = modelBuilder.createBox(40, 1, 40,
+    public Model groundModel = modelBuilder.createBox(40, 1, 40,
             new Material(ColorAttribute.createDiffuse(Color.YELLOW), ColorAttribute.createSpecular(Color.BLUE), FloatAttribute
                     .createShininess(16f)), VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
 
@@ -42,28 +44,50 @@ public class GameWorld {
 	public GameWorld()
 	{
 		Bullet.init();
+		System.out.println("Log: Bullet started");
 		initEnvironment();
 		initModelBatch();
 		initPersCamera();
 		addSystems();
 		addEntities();
-		
-//		engine = new Engine();
-//		
-//		ModelBuilder modelBuilder = new ModelBuilder();
-//		Material boxMaterial = new Material(ColorAttribute.createDiffuse(Color.WHITE), ColorAttribute.createSpecular(Color.RED), FloatAttribute.createShininess(16f));
-//		Model box = modelBuilder.createBox(5, 5, 5, boxMaterial, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
-//	
-//		Entity entity = new Entity();
-//		entity.add(new ModelComponent(box,10,10,10));
-//		engine.addEntity(entity);
-//
-//		engine.addSystem(new RenderSystem(batch, environment));
+	}
+	
+	private void initPersCamera()
+	{
+		cam = new PerspectiveCamera(cfg.FoV, cfg.VIRTUAL_WIDTH, cfg.VIRTUAL_HEIGTH);
+		System.out.println("Log: Camera created");
+	}
+	
+	private void initEnvironment()
+	{
+		environment = new Environment();
+		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.3f, 0.3f, 0.3f, 1f));
+		System.out.println("Log: Enviroment created");
+	}
+	
+	private void initModelBatch()
+	{
+		batch = new ModelBatch();
+		System.out.println("Log: Model Batch created");
+	}
+	
+	private void addSystems()
+	{
+		engine = new Engine();
+		engine.addSystem(new RenderSystem(batch, environment));
+		System.out.println("Log: RenderSystem added");
+		engine.addSystem(bulletSystem = new BulletSystem());
+		System.out.println("Log: Physics System added");
+		engine.addSystem(new PlayerSystem(this, cam));
+		System.out.println("Log: Player System added");
 	}
 	
 	private void addEntities()
 	{
 		createGround();
+		System.out.println("Log: Map Created");
+		createPlayer(5, 3, 5);
+		System.out.println("Log: Player Created");
 	}
 	
 	private void createGround()
@@ -75,34 +99,12 @@ public class GameWorld {
         engine.addEntity(EntityFactory.createStaticEntity(wallVertical, -20, 10, 0));
 	}
 	
-	private void addSystems()
+	private void createPlayer(float x, float y, float z)
 	{
-		engine = new Engine();
-		engine.addSystem(new RenderSystem(batch, environment));
-		engine.addSystem(bulletSystem = new BulletSystem());
+		character = EntityFactory.createPlayer(bulletSystem, x, y, z);
+		engine.addEntity(character);
 	}
-	
-	private void initPersCamera()
-	{
-		cam = new PerspectiveCamera(cfg.FoV, cfg.VIRTUAL_WIDTH, cfg.VIRTUAL_HEIGTH);
-		cam.position.set(30f, 40f, 30f);
-		cam.lookAt(0f, 0f, 0f);
-		cam.near = 1f;
-		cam.far = 300f;
-		cam.update();
-	}
-	
-	private void initEnvironment()
-	{
-		environment = new Environment();
-		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.3f, 0.3f, 0.3f, 1f));
-	}
-	
-	private void initModelBatch()
-	{
-		batch = new ModelBatch();
-	}
-	
+
 	public void render(float delta)
 	{
 		renderWorld(delta);
@@ -120,11 +122,19 @@ public class GameWorld {
 	 * hence we add it to the dispose function **/
 	public void dispose()
 	{
+		bulletSystem.collisionWorld.removeAction(character.getComponent(CharacterComponent.class).characterController);
+		bulletSystem.collisionWorld.removeCollisionObject(character.getComponent(CharacterComponent.class).ghostObject);
 		bulletSystem.dispose();
 		bulletSystem = null;
+		
+		character.getComponent(CharacterComponent.class).characterController.dispose();
+		character.getComponent(CharacterComponent.class).ghostObject.dispose();
+		character.getComponent(CharacterComponent.class).ghostShape.dispose();
+		
 		wallHorizontal.dispose();
 		wallVertical.dispose();
 		groundModel.dispose();
+		
 		batch.dispose();
 		batch = null;
 	}

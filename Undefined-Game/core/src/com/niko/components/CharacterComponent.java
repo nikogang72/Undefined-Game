@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.bullet.collision.btPairCachingGhostObject;
 import com.badlogic.gdx.physics.bullet.dynamics.btKinematicCharacterController;
 
 public class CharacterComponent implements Component {
+	
 	public btConvexShape ghostShape;
 	public btPairCachingGhostObject ghostObject;
 	public btKinematicCharacterController characterController;
