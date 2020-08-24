@@ -19,6 +19,7 @@ public class UndefinedCore extends Game {
 	
 	@Override
 	public void create () {
+		new Assets();
 		setScreen(new GameScreen(this));
 	}
 
@@ -52,6 +53,6 @@ public class UndefinedCore extends Game {
 	
 	@Override
 	public void dispose () {
-		
+		Assets.dispose();
 	}
 }

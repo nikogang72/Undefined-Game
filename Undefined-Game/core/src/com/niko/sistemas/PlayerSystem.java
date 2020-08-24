@@ -10,9 +10,14 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.Ray;
+import com.badlogic.gdx.physics.bullet.collision.ClosestRayResultCallback;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.niko.components.CharacterComponent;
+import com.niko.components.EnemyComponent;
 import com.niko.components.ModelComponent;
 import com.niko.components.PlayerComponent;
+import com.niko.components.StatusComponent;
 import com.niko.undefgame.GameWorld;
 
 public class PlayerSystem extends EntitySystem implements EntityListener {
@@ -24,11 +29,15 @@ public class PlayerSystem extends EntitySystem implements EntityListener {
 	private final Vector3 tmp = new Vector3();
 	private final Camera camera;
     private GameWorld gameWorld;
+    private ClosestRayResultCallback rayTestCB;
+    private Vector3 rayFrom = new Vector3();
+    private Vector3 rayTo = new Vector3();
 	
 	public PlayerSystem(GameWorld gameWorld, Camera camera) 
 	{
 		this.camera = camera;
 		this.gameWorld = gameWorld;
+		rayTestCB = new ClosestRayResultCallback(Vector3.Zero, Vector3.Z);
 	}
 	
 	@Override
@@ -85,6 +94,30 @@ public class PlayerSystem extends EntitySystem implements EntityListener {
 				camera.direction.x, camera.direction.y, camera.direction.z, 0);
 		camera.position.set(translation.x, translation.y, translation.z);
 		camera.update(true);
+		if (Gdx.input.justTouched()) fire();
+	}
+	
+	private void fire()
+	{
+		Ray ray = camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+		rayFrom.set(ray.origin);
+		rayTo.set(ray.direction).scl(50f).add(rayFrom); 
+		/* 50 meters max from the origin */
+		// Because we reuse the ClosestRayResultCallback, we need reset it's values
+		rayTestCB.setCollisionObject(null);
+		rayTestCB.setClosestHitFraction(1f);
+		rayTestCB.setRayFromWorld(rayFrom);
+		rayTestCB.setRayToWorld(rayTo);
+		gameWorld.bulletSystem.collisionWorld.rayTest(rayFrom, rayTo, rayTestCB);
+		
+		if (rayTestCB.hasHit())
+		{
+			final btCollisionObject obj = rayTestCB.getCollisionObject();
+			if (((Entity)obj.userData).getComponent(EnemyComponent.class) != null)
+			{
+				((Entity)obj.userData).getComponent(StatusComponent.class).alive = false;
+			}
+		}
 	}
 
 	@Override

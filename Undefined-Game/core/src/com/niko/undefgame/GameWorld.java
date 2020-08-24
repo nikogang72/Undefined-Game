@@ -21,6 +21,7 @@ import com.niko.sistemas.EnemySystem;
 import com.niko.sistemas.PlayerSystem;
 import com.niko.sistemas.RenderSystem;
 import com.niko.sistemas.StatusSystem;
+import com.niko.ui.GameUI;
 
 public class GameWorld {
 	
@@ -43,7 +44,7 @@ public class GameWorld {
                     .createShininess(16f)), VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
 
 	
-	public GameWorld()
+	public GameWorld(GameUI gameUI)
 	{
 		Bullet.init();
 		System.out.println("Log: Bullet started");
@@ -56,7 +57,7 @@ public class GameWorld {
 	
 	private void initPersCamera()
 	{
-		cam = new PerspectiveCamera(cfg.FoV, cfg.VIRTUAL_WIDTH, cfg.VIRTUAL_HEIGTH);
+		cam = new PerspectiveCamera(cfg.FoV, cfg.VIRTUAL_WIDTH, cfg.VIRTUAL_HEIGHT);
 		System.out.println("Log: Camera created");
 	}
 	
